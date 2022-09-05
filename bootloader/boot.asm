@@ -1,11 +1,11 @@
-[bits 16]
 [org 0x7c00]
+[bits 16]
 
-jmp short entry
+jmp short start
 nop
 
 bpb_oem: db "MSWIN4.1"
-bpb_bps: dw 0x200
+bpb_bps: dw 512
 bpb_spc: db 1
 bpb_rs:  dw 1
 bpb_fc:  db 2
@@ -22,19 +22,20 @@ ebr_dn:  db 0
          db 0
 ebr_sig: db 0x29
 ebr_vid: db 0x73, 0x44, 0x4f, 0x53
-ebr_vn:  db "sDOS Boot "
+ebr_vn:  db " sDOS Boot "
 ebr_sid: db "FAT12   "
 
-[global entry]
-entry:
-    mov [ebr_dn], dl
+start:
     xor ax, ax
     mov ds, ax
     mov es, ax
     mov ss, ax
     mov sp, 0x7c00
-
-    clc
+    push es
+    push word .after
+    retf
+.after:
+    mov [ebr_dn], dl
     mov ah, 0x41
     mov bx, 0x55AA
     mov dl, 0x80
@@ -79,7 +80,6 @@ entry:
     pop ax
     mov [d_lba], ax
     mov word [db_add], buffer
-    mov word [db_add+2], 0
     call read_disk
 
     xor bx, bx
@@ -102,6 +102,10 @@ entry:
 .found_kernel:
     mov ax, [di+26]
     mov [stage2_cluster], ax
+
+    mov si, msg_found
+    call print
+
     mov ax, [bpb_rs]
     mov [d_lba], ax
     mov word [db_add], buffer
@@ -109,9 +113,9 @@ entry:
     mov [blkcnt], ax
     call read_disk
 
-    mov bx, 0
+    mov bx, STAGE2_LOAD_SEGMENT
     mov es, bx
-    mov bx, 0x1000
+    mov bx, STAGE2_LOAD_ADDRESS
 .load_kernel_loop:
     mov ax, [stage2_cluster]
     add ax, 31
@@ -131,18 +135,26 @@ entry:
     jz .even
 .odd:
     shr ax, 4
-    jmp .next_cluser_after
+    jmp .next_cluster_after
 .even:
     and ax, 0x0FFF
-.next_cluser_after:
-    mov dl, [ebr_dn]
-    mov ax, 0
+.next_cluster_after:
+    cmp ax, 0x0FF8
+    jae .read_finish
+    mov [stage2_cluster], ax
+    jmp .load_kernel_loop
+.read_finish:
+    mov si, msg_done
+    call print
+
+    mov ax, STAGE2_LOAD_SEGMENT
     mov ds, ax
     mov es, ax
-    jmp 0:0x1000
+
+    jmp STAGE2_LOAD_SEGMENT:STAGE2_LOAD_ADDRESS
+    jmp $
 
 read_disk:
-    pusha
     clc
     mov si, PACKET
     mov ah, 0x42
@@ -150,7 +162,6 @@ read_disk:
     int 0x13
     mov ax, 0x2
     jc .on_error
-    popa
     ret
 .on_error:
     cmp ah, 0
@@ -172,23 +183,23 @@ print:
 error:
     mov si, error_msg
     call print
-    cmp ax, 0x1
-    je .lba_error
-    cmp ax, 0x2
-    je .disk_error
+;    cmp ax, 0x1
+;    je .lba_error
+;    cmp ax, 0x2
+;    je .disk_error
     cmp ax, 0x3
     je .nf_error
 .end:
     jmp $
     ret
-.lba_error:
-    mov si, lba_msg
-    call print
-    jmp .end
-.disk_error:
-    mov si, disk_msg
-    call print
-    jmp .end
+;.lba_error:
+;    mov si, lba_msg
+;    call print
+;    jmp .end
+;.disk_error:
+;    mov si, disk_msg
+;    call print
+;    jmp .end
 .nf_error:
     mov si, nf_msg
     call print
@@ -206,12 +217,19 @@ d_lba:  dd 1    ; lba
 
 ; Strings
 error_msg: db "ERROR", 0xD,0xA,0
-lba_msg: db "LBA not supported", 0
-disk_msg: db "Disk Error", 0
+;lba_msg: db "LBA not supported", 0
+;disk_msg: db "Disk Error", 0
 nf_msg: db "Stage 2 not found", 0
 msg_loading: db "Loading...", 0xD, 0xA, 0
+msg_iteration: db "Iter", 0
+msg_done: db "Done", 0
+msg_found: db "Found stage 2!", 0xD, 0xA, 0
 stage2_file: db "STAGE2  BIN", 0
 stage2_cluster: dw 0
+
+STAGE2_LOAD_SEGMENT: db 0x1000
+STAGE2_LOAD_ADDRESS: db 0
+
 times 510-($-$$) db 0
 dw 0xAA55
 buffer:
