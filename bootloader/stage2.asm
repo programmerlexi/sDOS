@@ -1,8 +1,9 @@
-org 0x0
 bits 16
+extern main
 entry:
     mov si, stage_msg
     call print
+    call main
     jmp $
 
 print:
