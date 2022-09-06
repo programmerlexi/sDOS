@@ -9,7 +9,9 @@ stage2:
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/stage2.cpp -o tmp/stage2.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/disk.cpp -o tmp/disk.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/fat.cpp -o tmp/fat.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
-	/usr/local/i386elfgcc/bin/i386-elf-ld -m elf_i386 -o tmp/stage2.bin -Ttext 0x00000000 tmp/stage2_entry.o tmp/stage2.o tmp/disk.o tmp/fat.o --oformat binary
+	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/memory.cpp -o tmp/memory.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
+	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/string.cpp -o tmp/string.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
+	/usr/local/i386elfgcc/bin/i386-elf-ld -m elf_i386 -o tmp/stage2.bin -Ttext 0x00000000 tmp/stage2_entry.o tmp/stage2.o tmp/disk.o tmp/fat.o tmp/memory.o tmp/string.o --oformat binary
 
 build: workspace
 # Use nanobytes bootloader as my own does not work

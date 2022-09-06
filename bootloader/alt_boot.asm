@@ -45,15 +45,11 @@ start:
     
     ; setup stack
     mov ss, ax
-    mov sp, 0x7C00              ; stack grows downwards from where we are loaded in memory
+    mov sp, 0xf000              ; stack grows downwards from where we are loaded in memory
+    mov bp, sp
 
     ; some BIOSes might start us at 07C0:0000 instead of 0000:7C00, make sure we are in the
     ; expected location
-    push es
-    push word .after
-    retf
-
-.after:
 
     ; read something from floppy disk
     ; BIOS should set DL to drive number
@@ -189,6 +185,7 @@ start:
 .read_finish:
     
     ; jump to our kernel
+    mov dh, 0
     mov dl, [ebr_drive_number]          ; boot device in dl
 
     mov ax, KERNEL_LOAD_SEGMENT         ; set segment registers

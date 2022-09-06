@@ -1,6 +1,7 @@
 bits 16
 extern main
 entry:
+    push dx
     mov si, stage_msg
     call print
     call main
@@ -48,33 +49,33 @@ get_drive_params:
     mov bp, sp
     push es
     push bx
-    push esi
+    push si
     push di
     mov dl, [bp + 8]
     mov ah, 0x08
     mov di, 0
     stc
     int 0x13
-    mov eax, 1
-    sbb eax, 0
-    LinearToSegOffset [bp + 12], es, esi, si
+    mov ax, 1
+    sbb ax, 0
+    LinearToSegOffset [bp + 12], es, si, si
     mov [es:si], bl
     mov bl, ch
     mov bh, cl
     shr bh, 6
     inc bx
-    LinearToSegOffset [bp + 16], es, esi, si
+    LinearToSegOffset [bp + 16], es, si, si
     mov [es:si], bx
     xor ch, ch
     and cl, 0x3F
-    LinearToSegOffset [bp + 20], es, esi, si
+    LinearToSegOffset [bp + 20], es, si, si
     mov [es:si], cx
     mov cl, dh
     inc cx
-    LinearToSegOffset [bp + 24], es, esi, si
+    LinearToSegOffset [bp + 24], es, si, si
     mov [es:si], cx
     pop di
-    pop esi
+    pop si
     pop bx
     pop es
     mov sp, bp
@@ -89,8 +90,8 @@ x86_reset_disk:
     mov dl, [bp + 8]
     stc
     int 0x13
-    mov eax, 1
-    sbb eax, 0
+    mov ax, 1
+    sbb ax, 0
     mov sp, bp
     pop bp
     ret
@@ -99,7 +100,7 @@ x86_reset_disk:
 x86_read_disk:
     push bp
     mov bp, sp
-    push ebx
+    push bx
     push es
     mov dl, [bp + 8]
     mov ch, [bp + 12]
@@ -110,16 +111,17 @@ x86_read_disk:
     or cl, al
     mov dh, [bp + 20]
     mov al, [bp + 24]
-    LinearToSegOffset [bp + 28], es, ebx, bx
+    LinearToSegOffset [bp + 28], es, bx, bx
     mov ah, 0x02
     stc
     int 0x13
-    mov eax, 1
-    sbb eax, 0
+    mov ax, 1
+    sbb ax, 0
     pop es
-    pop ebx
+    pop bx
     mov sp, bp
     pop bp
     ret
 
 stage_msg: db "Stage 2 loaded!", 0xD, 0xA, 0
+g_boot_drive: db 0

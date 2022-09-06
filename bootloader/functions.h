@@ -25,3 +25,21 @@ bool fat_read_entry(disk_t *disk, fat_file_t *file, fat_directory_entry_t *direc
 void fat_close(fat_file_t *file);
 bool fat_find_file(disk_t *disk, fat_file_t *file, const char *name, fat_directory_entry_t *entry);
 fat_file_t *fat_open(disk_t *disk, const char *path);
+
+// Memory
+void* memcpy(void* dst, void* src, uint16_t count);
+void* memset(void* ptr, int value, uint16_t count);
+bool memcmp(void* ptr1, void* ptr2, uint16_t count);
+
+// Stage 2
+void print_char(char c);
+void print_string(char* string);
+void print_string(const char* string);
+extern "C" void main(uint16_t boot_drive);
+
+// String
+const char* strchr(const char* str, char chr);
+char* strcpy(char* dst, const char* src);
+unsigned strlen(const char* str);
+bool islower(char chr);
+char toupper(char chr);
