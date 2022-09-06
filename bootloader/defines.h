@@ -1,0 +1,5 @@
+#pragma once
+#define SECTOR_SIZE 512
+#define MAX_PATH_SIZE 256
+#define MAX_FILE_HANDLES 10
+#define ROOT_DIRECTORY_HANDLE -1

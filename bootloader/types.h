@@ -1,3 +1,5 @@
+#pragma once
+#include "defines.h"
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
@@ -33,6 +35,49 @@ enum fat_attributes {
     FAT_ATTRIBUTE_ARCHIVE           = 0x20,
     FAT_ATTRIBUTE_LFN               = FAT_ATTRIBUTE_READ_ONLY | FAT_ATTRIBUTE_HIDDEN | FAT_ATTRIBUTE_SYSTEM | FAT_ATTRIBUTE_VOLUME_ID
 };
+
+typedef struct {
+    // Boot Record
+    uint8_t boot_jump_instruction[3];
+    uint8_t oem_id[8];
+    uint16_t bytes_per_sector;
+    uint8_t sectors_per_cluster;
+    uint16_t reserved_sectors;
+    uint8_t fat_count;
+    uint16_t root_dir_entries;
+    uint16_t total_sectors;
+    uint8_t media_descriptor_type;
+    uint16_t sectors_per_fat;
+    uint16_t sectors_per_track;
+    uint16_t heads;
+    uint32_t hidden_sectors;
+    uint32_t large_sector;
+    // Extended boot record
+    uint8_t drive_number;
+    uint8_t _reserved;
+    uint8_t signature;
+    uint32_t volume_id;
+    uint8_t volume_label[11];
+    uint8_t sys_id;
+} __attribute__ ((packed)) fat_boot_sector_t;
+
+typedef struct {
+    uint8_t buffer[SECTOR_SIZE];
+    fat_file_t pub;
+    bool opened;
+    uint32_t first_cluster;
+    uint32_t current_cluster;
+    uint32_t current_sector_in_cluster;
+} fat_file_data_t;
+
+typedef struct {
+    union {
+        fat_boot_sector_t boot_sector;
+        uint8_t boot_sector_bytes[SECTOR_SIZE];
+    } bs;
+    fat_file_data_t root_directory;
+    fat_file_data_t open_files[MAX_FILE_HANDLES];
+} fat_data_t;
 
 typedef struct {
     uint8_t id;

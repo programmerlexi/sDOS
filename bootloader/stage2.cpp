@@ -21,5 +21,6 @@ void print_string(const char *string) {
 }
 
 extern "C" void main() {
-    print_string("Hello, World!");
+    print_string("Hello, World from C++!\n\r");
+    for (;;);
 }
