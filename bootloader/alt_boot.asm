@@ -45,11 +45,8 @@ start:
     
     ; setup stack
     mov ss, ax
-    mov sp, 0xf000              ; stack grows downwards from where we are loaded in memory
+    mov sp, 0x9c00              ; stack grows downwards from where we are loaded in memory
     mov bp, sp
-
-    ; some BIOSes might start us at 07C0:0000 instead of 0000:7C00, make sure we are in the
-    ; expected location
 
     ; read something from floppy disk
     ; BIOS should set DL to drive number

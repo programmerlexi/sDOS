@@ -39,45 +39,60 @@ outb:
 [global inb]
 inb:
     mov dx, [bp + 4]
-    xor eax, eax
+    xor ax, ax
     in al, dx
     ret
 
 [global get_drive_params]
 get_drive_params:
-    push bp
-    mov bp, sp
+    ; make new call frame
+    push bp             ; save old call frame
+    mov bp, sp          ; initialize new call frame
+
+    ; save regs
     push es
     push bx
     push si
     push di
-    mov dl, [bp + 8]
-    mov ah, 0x08
-    mov di, 0
+
+    ; call int13h
+    mov dl, [bp + 4]    ; dl - disk drive
+    mov ah, 08h
+    mov di, 0           ; es:di - 0000:0000
+    mov es, di
     stc
-    int 0x13
+    int 13h
+
+    ; return
     mov ax, 1
     sbb ax, 0
-    LinearToSegOffset [bp + 12], es, si, si
-    mov [es:si], bl
-    mov bl, ch
-    mov bh, cl
+
+    ; out params
+    mov si, [bp + 6]    ; drive type from bl
+    mov [si], bl
+
+    mov bl, ch          ; cylinders - lower bits in ch
+    mov bh, cl          ; cylinders - upper bits in cl (6-7)
     shr bh, 6
-    inc bx
-    LinearToSegOffset [bp + 16], es, si, si
-    mov [es:si], bx
-    xor ch, ch
-    and cl, 0x3F
-    LinearToSegOffset [bp + 20], es, si, si
-    mov [es:si], cx
-    mov cl, dh
-    inc cx
-    LinearToSegOffset [bp + 24], es, si, si
-    mov [es:si], cx
+    mov si, [bp + 8]
+    mov [si], bx
+
+    xor ch, ch          ; sectors - lower 5 bits in cl
+    and cl, 3Fh
+    mov si, [bp + 10]
+    mov [si], cx
+
+    mov cl, dh          ; heads - dh
+    mov si, [bp + 12]
+    mov [si], cx
+
+    ; restore regs
     pop di
     pop si
     pop bx
     pop es
+
+    ; restore old call frame
     mov sp, bp
     pop bp
     ret
@@ -87,11 +102,11 @@ x86_reset_disk:
     push bp
     mov bp, sp
     mov ah, 0
-    mov dl, [bp + 8]
+    mov dl, [bp + 4]
     stc
-    int 0x13
+    int 13h
     mov ax, 1
-    sbb ax, 0
+    sbb ax, 0  
     mov sp, bp
     pop bp
     ret
@@ -102,19 +117,21 @@ x86_read_disk:
     mov bp, sp
     push bx
     push es
-    mov dl, [bp + 8]
-    mov ch, [bp + 12]
-    mov cl, [bp + 13]
+    mov dl, [bp + 4]
+    mov ch, [bp + 6]
+    mov cl, [bp + 7]
     shl cl, 6
-    mov al, [bp + 16]
-    and al, 0x3F
+    mov al, [bp + 8]
+    and al, 3Fh
     or cl, al
-    mov dh, [bp + 20]
-    mov al, [bp + 24]
-    LinearToSegOffset [bp + 28], es, bx, bx
-    mov ah, 0x02
+    mov dh, [bp + 10]
+    mov al, [bp + 12]
+    mov bx, [bp + 16]
+    mov es, bx
+    mov bx, [bp + 14]
+    mov ah, 02h
     stc
-    int 0x13
+    int 13h
     mov ax, 1
     sbb ax, 0
     pop es

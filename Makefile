@@ -23,7 +23,7 @@ build: workspace
 	mcopy -i imgs/OS.img tmp/stage2.bin "::stage2.bin"
 
 run: build
-	qemu-system-x86_64 imgs/OS.img -m 128M
+	qemu-system-x86_64 -fda imgs/OS.img -m 128M
 
 clean:
 	rm -rf tmp
