@@ -1,12 +1,18 @@
 #include "functions.h"
 bool disk_init(disk_t *disk, uint8_t drive_number) {
     uint8_t drive_type;
-    uint16_t cylinders, sectors, heads = 0;
-    if (!get_drive_params(drive_number, &drive_type, &cylinders, &sectors, &heads))
+    uint16_t cylinders, sectors = 0;
+    uint8_t heads = 0;
+    /*if (!get_drive_params(drive_number, &drive_type, &cylinders, &sectors, &heads))
         return false;
     
     disk->id = drive_number;
     disk->cylinders = cylinders;
+    disk->heads = heads;
+    disk->sectors = sectors;*/
+    if (!x86_hs(drive_number, &sectors, &heads))
+        return false;
+    disk->id = drive_number;
     disk->heads = heads;
     disk->sectors = sectors;
     drive_type = drive_number & 0x80; // 0x00 = floppy, 0x80 = HDD

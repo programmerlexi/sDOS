@@ -12,6 +12,7 @@ extern "C" uint8_t inb(uint16_t port);
 extern "C" bool get_drive_params(uint8_t drive, uint8_t *drive_type, uint16_t *cylinders, uint16_t *sectors, uint16_t *heads);
 extern "C" bool x86_reset_disk(uint8_t drive);
 extern "C" bool x86_read_disk(uint8_t drive, uint16_t cylinder, uint16_t sector, uint16_t head, uint8_t count, void* data);
+extern "C" bool x86_hs(uint8_t drive, uint16_t *sectors, uint8_t *heads);
 
 // FAT
 bool fat_read_boot_sector(disk_t *disk);
