@@ -25,7 +25,7 @@ build_kernel:
 build_boot:
 	nasm bootloader/alt_boot.asm -f bin -o tmp/boot.bin
 	dd if=/dev/zero of=imgs/OS.img bs=512 count=2880
-	sudo mkfs.fat -F 12 -n "sDOS Boot" imgs/OS.img
+	sudo mkfs.fat -F 12 -n "SDOS SYSTEM" imgs/OS.img
 	dd if=tmp/boot.bin of=imgs/OS.img conv=notrunc
 
 build: workspace

@@ -30,7 +30,7 @@ ebr_drive_number:           db 0                        ; 0x00 floppy, 0x80 hdd,
                             db 0                        ; reserved
 ebr_signature:              db 29h
 ebr_volume_id:              db 0x73, 0x44, 0x4f, 0x53   ; serial number, value doesn't matter
-ebr_volume_label:           db ' sDOS Boot '            ; 11 bytes, padded with spaces
+ebr_volume_label:           db 'SDOS SYSTEM'            ; 11 bytes, padded with spaces
 ebr_system_id:              db 'FAT12   '               ; 8 bytes
 
 ;
