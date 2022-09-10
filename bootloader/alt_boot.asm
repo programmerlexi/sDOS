@@ -358,8 +358,8 @@ disk_reset:
 
 msg_loading:            db 'Loading...', ENDL, 0
 msg_read_failed:        db 'Read from disk failed!', ENDL, 0
-msg_kernel_not_found:   db 'STAGE2.BIN file not found!', ENDL, 0
-file_kernel_bin:        db 'KERNEL BIN'
+msg_kernel_not_found:   db 'KERNEL.BIN file not found!', ENDL, 0
+file_kernel_bin:        db 'KERNEL  BIN'
 kernel_cluster:         dw 0
 
 KERNEL_LOAD_SEGMENT     equ 0x1000
