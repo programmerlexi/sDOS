@@ -183,8 +183,8 @@ start:
     ; jump to our kernel
     mov dh, 0
     mov dl, [ebr_drive_number]          ; boot device in dl
-    mov bx, [bdb_sectors_per_track]     ; drive data
-    mov cx, [bdb_heads]                 ; more drive data
+    mov bx, [bdb_sectors_per_track]     ; sectors per track
+    mov cx, [bdb_heads]                 ; heads
 
     mov ax, KERNEL_LOAD_SEGMENT         ; set segment registers
     mov ds, ax

@@ -23,7 +23,7 @@ void print_string(const char *string) {
 
 extern "C" void main(uint16_t boot_drive) {
     print_string("Hello, World from C++!\n\r");
-    print_string("Initializing disk driver... ");
+    //print_string("Initializing disk driver... ");
     disk_t* disk = (disk_t*)0x5000;
     fat_boot_sector_t *boot_sector = (fat_boot_sector_t*)MEMORY_FAT_ADDR;
     /*if (!disk_init(disk,boot_drive)) {
