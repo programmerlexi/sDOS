@@ -1,19 +1,19 @@
 #include "functions.h"
-static fat_data_t *g_data;
-static uint8_t *g_fat = (uint8_t*)NULL;
+static fat_data_t* g_data;
+static uint8_t* g_fat = (uint8_t*)NULL;
 static uint32_t g_data_section_lba;
 
-bool fat_read_boot_sector(disk_t *disk) {
+bool fat_read_boot_sector(device_t *disk) {
     print_string("Reading boot sector!\n\r");
     return disk_read(disk, 0, 1, g_data->bs.boot_sector_bytes);
 }
 
-bool fat_read_fat(disk_t *disk) {
+bool fat_read_fat(device_t *disk) {
     print_string("Reading fat!\n\r");
-    return disk_read(disk, g_data->bs.boot_sector.reserved_sectors, g_data->bs.boot_sector.sectors_per_fat, g_fat);
+    return disk_read(disk, g_data->bs.boot_sector.reserved_sectors, g_data->bs.boot_sector.sectors_per_fat, &g_fat);
 }
 
-bool fat_init(disk_t *disk) {
+bool fat_init(device_t *disk) {
     g_data = (fat_data_t*)MEMORY_FAT_ADDR;
     if (!fat_read_boot_sector(disk)) {
         print_string("FAT: failed to read boot sector\n\r");
@@ -46,7 +46,7 @@ bool fat_init(disk_t *disk) {
         return false;
     }
     print_string("Got root directory!\n\r");
-    uint32_t root_dir_sectors = (root_dir_size + g_data->bs.boot_sector.bytes_per_sector - 1) / g_data->bs.boot_sector.bytes_per_sector;
+    uint32_t root_dir_sectors = (root_dir_size + 512 - 1) / 512;
     g_data_section_lba = root_dir_lba + root_dir_sectors;
     for (int i = 0; i < MAX_FILE_HANDLES; i++)
         g_data->open_files[i].opened = false;
@@ -58,7 +58,7 @@ uint32_t fat_cluster2lba(uint32_t cluster) {
     return g_data_section_lba + (cluster - 2) * g_data->bs.boot_sector.sectors_per_cluster;
 }
 
-fat_file_t *fat_open_entry(disk_t *disk, fat_directory_entry_t *entry) {
+fat_file_t *fat_open_entry(device_t *disk, fat_directory_entry_t *entry) {
     int handle = -1;
     for (int i = 0; i < MAX_FILE_HANDLES && handle < 0; i++) {
         if (!g_data->open_files[i].opened)
@@ -96,7 +96,7 @@ uint32_t fat_next_cluster(uint32_t current_cluster) {
     }
 }
 
-uint32_t fat_read(disk_t *disk, fat_file_t *file, uint32_t count, void* data) {
+uint32_t fat_read(device_t *disk, fat_file_t *file, uint32_t count, void* data) {
     fat_file_data_t *fd = (file->handle == ROOT_DIRECTORY_HANDLE)
         ? &g_data->root_directory
         : &g_data->open_files[file->handle];
@@ -136,7 +136,7 @@ uint32_t fat_read(disk_t *disk, fat_file_t *file, uint32_t count, void* data) {
     return u_data - (uint8_t*)data;
 }
 
-bool fat_read_entry(disk_t *disk, fat_file_t *file, fat_directory_entry_t *directory_entry) {
+bool fat_read_entry(device_t *disk, fat_file_t *file, fat_directory_entry_t *directory_entry) {
     return fat_read(disk, file, sizeof(fat_directory_entry_t), directory_entry) == sizeof(fat_directory_entry_t);
 }
 
@@ -149,7 +149,7 @@ void fat_close(fat_file_t *file) {
     }
 }
 
-bool fat_find_file(disk_t *disk, fat_file_t* file, const char* name, fat_directory_entry_t *out_entry) {
+bool fat_find_file(device_t *disk, fat_file_t* file, const char* name, fat_directory_entry_t *out_entry) {
     char fat_name[11];
     fat_directory_entry_t entry;
     memset(fat_name, ' ', sizeof(fat_name));
@@ -175,7 +175,7 @@ bool fat_find_file(disk_t *disk, fat_file_t* file, const char* name, fat_directo
     return false;
 }
 
-fat_file_t *fat_open(disk_t *disk, const char *path) {
+fat_file_t *fat_open(device_t *disk, const char *path) {
     char name[MAX_PATH_SIZE];
     if (path[0]=='/')
         path++;
@@ -196,11 +196,14 @@ fat_file_t *fat_open(disk_t *disk, const char *path) {
         }
         fat_directory_entry_t entry;
         if (fat_find_file(disk, current, name, &entry)) {
+            print_string("Found file in path\n\r");
             fat_close(current);
+            print_string("Closed directory\n\r");
             if (!is_last && entry.attributes & FAT_ATTRIBUTE_DIRECTORY == 0) {
                 print_string("FAT: not a directory\n\r");
                 return (fat_file_t*)NULL;
             }
+            print_string("Opening next file in path\n\r");
             current = fat_open_entry(disk, &entry);
         } else {
             fat_close(current);
@@ -208,5 +211,6 @@ fat_file_t *fat_open(disk_t *disk, const char *path) {
             return (fat_file_t*)NULL;
         }
     }
+    print_string("Got file\n\r");
     return current;
 }

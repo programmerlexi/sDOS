@@ -9,7 +9,7 @@
 #define MEMORY_FAT_SIZE     0x00010000
 #define MEMORY_LOAD_KERNEL  ((void*)0x30000)
 #define MEMORY_LOAD_SIZE    0x00010000
-#define MEMORY_KERNEL_ADDR  ((void*)0x100000)
+#define MEMORY_KERNEL_ADDR  ((void*)0x7c00)
 #define NULL ((void*)0)
 #define min(a,b)    ((a) < (b) ? (a) : (b))
 #define max(a,b)    ((a) > (b) ? (a) : (b))

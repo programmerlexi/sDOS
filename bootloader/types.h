@@ -3,6 +3,7 @@
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int uint32_t;
+typedef unsigned long uint64_t;
 
 typedef struct {
     uint8_t name[11];
@@ -85,3 +86,33 @@ typedef struct {
     uint16_t sectors;
     uint16_t heads;
 } disk_t;
+
+typedef struct device {
+    uint16_t base;
+    uint16_t dev_ctl;
+    uint8_t master_slave_bit;
+    uint64_t type;
+    char* dev_name;
+    device(uint16_t b, uint16_t ctl, uint8_t ms, char* name);
+} device_t;
+
+#define DEV_OFF_DATA 0
+#define DEV_OFF_ERR 1
+#define DEV_OFF_FEAT 1
+#define DEV_OFF_SC 2
+#define DEV_OFF_SN 3
+#define DEV_OFF_CL 4
+#define DEV_OFF_CH 5
+#define DEV_OFF_DSEL 6
+#define DEV_OFF_STAT 7
+#define DEV_OFF_CMD 7
+
+enum dev_type {
+    DEV_PATA,
+    DEV_SATA,
+    DEV_PATAPI,
+    DEV_SATAPI,
+    DEV_UNKNOWN,
+    DEV_DISCONNECTED,
+    DEV_UNINTIALIZED
+};

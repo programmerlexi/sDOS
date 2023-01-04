@@ -9,6 +9,7 @@ entry:
     mov si, stage_msg
     call print
     call main
+    jmp 0x6400
 .halt:
     hlt
     jmp .halt
@@ -22,7 +23,7 @@ fill_disk_struct:
     mov di, 0x5000
     mov [di], dl
 
-    add di, 3
+    add di, 1
 
     mov [di], bx
 
@@ -167,16 +168,11 @@ x86_hs:
 
 [global x86_reset_disk]
 x86_reset_disk:
-    push bp
-    mov bp, sp
     mov ah, 0
-    mov dl, [bp + 4]
     stc
     int 13h
     mov ax, 1
-    sbb ax, 0  
-    mov sp, bp
-    pop bp
+    sbb ax, 0
     ret
 
 [global x86_read_disk]
@@ -208,5 +204,8 @@ x86_read_disk:
     pop bp
     ret
 
+[global read_disk]
+read_disk:
+    
 stage_msg: db "Stage 2 loaded!", 0xD, 0xA, 0
 g_boot_drive: db 0

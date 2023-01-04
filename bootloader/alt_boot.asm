@@ -45,7 +45,7 @@ start:
     
     ; setup stack
     mov ss, ax
-    mov sp, 0x9c00              ; stack grows downwards from where we are loaded in memory
+    mov sp, 0x7c00              ; stack grows downwards from where we are loaded in memory
 
     ; read something from floppy disk
     ; BIOS should set DL to drive number
@@ -359,8 +359,8 @@ msg_kernel_not_found:   db 'STAGE2 file not found!', ENDL, 0
 file_kernel_bin:        db 'STAGE2  BIN'
 kernel_cluster:         dw 0
 
-KERNEL_LOAD_SEGMENT     equ 0x1000
-KERNEL_LOAD_OFFSET      equ 0
+KERNEL_LOAD_SEGMENT     equ 0x0
+KERNEL_LOAD_OFFSET      equ 0x500
 
 
 times 510-($-$$) db 0

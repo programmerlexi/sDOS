@@ -12,7 +12,8 @@ build_stage2:
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/fat.cpp -o tmp/fat.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/memory.cpp -o tmp/memory.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/string.cpp -o tmp/string.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
-	/usr/local/i386elfgcc/bin/i386-elf-ld -m elf_i386 -o tmp/stage2.bin -Ttext 0x00000000 tmp/stage2_entry.o tmp/stage2.o tmp/disk.o tmp/fat.o tmp/memory.o tmp/string.o --oformat binary
+	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/port.cpp -o tmp/port.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
+	/usr/local/i386elfgcc/bin/i386-elf-ld -m elf_i386 -o tmp/stage2.bin -Ttext 0x00000500 tmp/stage2_entry.o tmp/stage2.o tmp/disk.o tmp/fat.o tmp/memory.o tmp/string.o tmp/port.o --oformat binary
 
 build_kernel:
 	nasm kernel/kernel_entry.asm -f elf -o tmp/kernel/kernel_entry.o
@@ -20,7 +21,7 @@ build_kernel:
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c kernel/vga.cpp -o tmp/kernel/vga.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c kernel/keyboard.cpp -o tmp/kernel/keyboard.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c kernel/port.cpp -o tmp/kernel/port.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
-	/usr/local/i386elfgcc/bin/i386-elf-ld -m elf_i386 -o tmp/kernel/kernel.bin -Ttext 0x00000000 tmp/kernel/kernel_entry.o tmp/kernel/kernel.o tmp/kernel/vga.o tmp/kernel/keyboard.o tmp/kernel/port.o --oformat binary
+	/usr/local/i386elfgcc/bin/i386-elf-ld -m elf_i386 -o tmp/kernel/kernel.bin -Ttext 0x500 tmp/kernel/kernel_entry.o tmp/kernel/kernel.o tmp/kernel/vga.o tmp/kernel/keyboard.o tmp/kernel/port.o --oformat binary
 
 build_boot:
 	nasm bootloader/alt_boot.asm -f bin -o tmp/boot.bin
@@ -36,8 +37,8 @@ build: workspace
 	mcopy -i imgs/OS.img tmp/kernel/kernel.bin "::kernel.bin"
 
 run: build
-# Boot from floppy, 128 MB of memory
-	qemu-system-x86_64 -fda imgs/OS.img -m 128M
+# Boot from HDA, 128 MB of memory
+	qemu-system-x86_64 imgs/OS.img -m 128M
 
 clean:
 	rm -rf tmp
