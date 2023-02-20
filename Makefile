@@ -8,7 +8,7 @@ workspace:
 build_stage2:
 	nasm bootloader/stage2.asm -f elf -o tmp/stage2_entry.o
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/stage2.cpp -o tmp/stage2.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
-	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/disk.cpp -o tmp/disk.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
+	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/disk.cpp -o tmp/disk.o -mno-red-zone -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/fat.cpp -o tmp/fat.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/memory.cpp -o tmp/memory.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
 	/usr/local/i386elfgcc/bin/i386-elf-g++ -ffreestanding -m16 -g -c bootloader/string.cpp -o tmp/string.o -mno-red-zone -O1 -fpermissive -fno-pic -fno-builtin
@@ -38,7 +38,7 @@ build: workspace
 
 run: build
 # Boot from HDA, 128 MB of memory
-	qemu-system-x86_64 imgs/OS.img -m 128M
+	qemu-system-x86_64 imgs/OS.img -m 256M
 
 clean:
 	rm -rf tmp
